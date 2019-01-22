@@ -1,0 +1,79 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url = "https://files.minecraftforge.net/maven" }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle.forge'
+
+version = getVersion("VERSION")
+def llibrary_version = getVersion("LLIB_VERSION")
+group = "thecallunxz.wor"
+archivesBaseName = "WoR"
+
+sourceCompatibility = targetCompatibility = '1.8'
+compileJava {
+    sourceCompatibility = targetCompatibility = '1.8'
+}
+
+minecraft {
+    version = "1.12.2-14.23.5.2772"
+    runDir = "run"
+    mappings = "snapshot_20171003"
+}
+
+repositories {
+    maven {
+        name = "ilexiconn"
+        url = "https://maven.mcmoddev.com"
+    }
+	maven {
+        name = "baubles"
+        url = "https://jitpack.io"
+    }
+}
+
+dependencies {
+	compile "net.ilexiconn:llibrary:1.7.15-1.12.2:dev"
+	compile "com.github.azanor:Baubles:5df3d46"
+	
+}
+
+processResources {
+    inputs.property "version", project.version
+    inputs.property "mcversion", project.minecraft.version
+    inputs.property "llibrary_version", llibrary_version
+
+    from (sourceSets.main.resources.srcDirs) {
+        include "mcmod.info"
+        expand "version": project.version, "mcversion": project.minecraft.version, "llibrary_version": llibrary_version
+    }
+        
+    from (sourceSets.main.resources.srcDirs) {
+        exclude "mcmod.info"
+    }
+}
+
+String getVersion(String type) {
+    String major = "0";
+    String revision = "0";
+    String patch = "0";
+    String prefix = "public static final String $type = \"";
+    File file = file("src/main/java/thecallunxz/wor/Reference.java")
+    file.eachLine { String s ->
+        s = s.trim();
+        if (s.startsWith(prefix)) {
+            s = s.substring(prefix.length(), s.length() - 2);
+            String[] pts = s.split("\\.");
+
+            major = pts[0];
+            revision = pts[1];
+            patch = pts[2];
+        }
+    }
+
+    return "$major.$revision.$patch";
+}
